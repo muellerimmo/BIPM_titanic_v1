@@ -1,0 +1,95 @@
+#importing the regular stuff
+import pandas as pd
+import seaborn as sb    
+import numpy as npa
+#!/usr/bin/env python
+# coding: utf-8
+
+# In[172]:
+#importing the regular stuff
+import pandas as pd
+import seaborn as sb    
+import numpy as np
+
+# In[164]:
+#loading the data_sets
+data=pd.read_csv('train.csv')
+test=pd.read_csv('test.csv')
+
+# In[16]:
+#show the data
+data.head()
+
+
+# In[18]:
+#to have a first visualisation of the data
+sb.pairplot(data)
+
+
+# In[19]:
+#to know something about the correlation of the features
+print (data.corr())
+
+
+# In[182]:
+#importing the libary needed for the logistic Regression
+from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import cross_val_score
+from sklearn import metrics
+from sklearn.model_selection import train_test_split
+
+
+# In[195]:
+#We decided to just use 'Age' for the Logistic Regression. later on I decided to use 'Age' and 'Pclass'
+df = pd.DataFrame(data['Age']) 
+df['Survived'] = data['Survived'] 
+df['Pclass'] = data['Pclass'] 
+
+# cleaning data (exclude NAN)
+df=df.dropna(axis=0)
+
+#Creating feature which should include the features we use to predict
+feature= pd.DataFrame(df['Age'])
+feature['Pclass']=df['Pclass']
+
+# I stored the feature.values in X because the logisticregression modell just want the values without in index
+X = feature.values
+
+# I changed the y (what we wanna predict) in y and changed the format, because the logistic regression dont want is as an column
+y= df['Survived'].ravel()
+
+# I calculated the mean of the people died. 38,38 % died in the Training Set. It's usefull to know, if you test the predictor later
+print(np.mean(data['Survived']) )
+
+
+# In[198]:
+# We intialize the LogisticRegression and fitted it with the training data
+logistc_reg = LogisticRegression()
+logistc_reg.fit(X, y)
+
+
+# In[209]:
+#to look at the test data-> doesn't have data for survived (So we can't validate our prediction)
+test.head()
+
+
+# In[224]:
+#I loaded the test data we need in df_test and dropped all the "NAN" Values
+df_test = pd.DataFrame(test['Age']) 
+df_test['Pclass'] = test['Pclass'] 
+df_test=df_test.dropna(axis=0)
+X_test=df_test.values
+
+
+# In[227]:
+#I stored the probabilty of someone is dieing in y_prob and the result (predicted to be dead) in y_pred
+y_prob = logistc_reg.predict_proba(X_test)[:,1]
+y_pred = np.where(y_prob > 0.5, 1, 0)
+
+#I Print out the mean of predicted dead people. The Train Set was 38,38 % dead. For the Test Set i have around 36,44%
+print('mean survived is', np.mean(y_pred) )
+#print(y_pred)
+#print(y_prob)
+
+
+# 
